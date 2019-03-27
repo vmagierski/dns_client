@@ -46,9 +46,9 @@ class DNS_Request:
         ARCount = 0 #(# of items in Authority Section)
 
         header_bytes = msg_id
-        flags_as_bytes = struct.pack('h', flags)
+        flags_as_bytes = struct.pack('>h', flags)
         header_bytes += flags_as_bytes
-        header_bytes += struct.pack('hhhh', QDCount, ANCount, NSCount, ARCount)
+        header_bytes += struct.pack('>hhhh', QDCount, ANCount, NSCount, ARCount)
         return header_bytes
 
     def _construct_question_section(self, name):
@@ -57,7 +57,7 @@ class DNS_Request:
         QClass = 1 # 2 bytes, value of 1 represents Internet
 
         question_section_bytes = QName
-        question_section_bytes += struct.pack('h', QType) + struct.pack('h', QClass)
+        question_section_bytes += struct.pack('>hh', QType, QClass) 
         return question_section_bytes
 
     def _construct_QName(self, name):
