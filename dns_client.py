@@ -16,7 +16,7 @@ def main():
 
   sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-  dns_request = DNS_Request('www.example.com')
+  dns_request = DNS_Message(hostname)
 
   dns_request = dns_request.to_bytes()
 
@@ -31,12 +31,10 @@ def main():
     # receive data
     data = sock.recvfrom(512)
     print('received {!r}'.format(data))
-    
 
   finally:
     print('closing socket')
     sock.close()
-
 
 
 if __name__ == "__main__":
