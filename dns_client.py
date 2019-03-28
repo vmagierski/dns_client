@@ -27,10 +27,14 @@ def main():
     print(dns_request)
     sent = sock.sendto(dns_request, (forwarder, PORT))
     print('sent')
+    print(str(sent))
 
     # receive data
-    data = sock.recvfrom(512)
+    data , _ = sock.recvfrom(512)
     print('received {!r}'.format(data))
+    import pdb; pdb.set_trace()
+
+    response = DNS_Response(data)
 
   finally:
     print('closing socket')

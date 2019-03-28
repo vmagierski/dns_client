@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import struct
+import myutils
 
 '''
     +---------------------+
@@ -20,6 +21,8 @@ class DNS_Message:
         self.header = Header()
         print('created header: ')
         print(self.header.to_bytes())
+        print('header msg id: ')
+        print(self.header.msg_id)
 
         self.question = self._construct_question_section(hostname)
         self.answer = answer
@@ -95,6 +98,32 @@ class Header:
         self.NSCount = NSCount
         self.ARCount = ARCount
 
+    def from_bytes(self, byte_data):
+        # Unpack/convert from network to host order?
+        self.msg_id = byte_data[0:2]
+        flags = byte_data[2:4] 
+
+        flags_as_string_of_ones_and_zeros = ''
+
+        for b in flags:
+            for i in range(0,8):
+                current = '1' if myutils.is_set(i, b) else '0'
+                flags_as_string_of_ones_and_zeros += current
+
+        self.QR = myutils.is_set(0, flags[0])
+        self.OPCODE = flags_as_string_of_ones_and_zeros[1:5]
+        self.AA = flags_as_string_of_ones_and_zeros[5]
+        self.TC = flags_as_string_of_ones_and_zeros[6]
+        self.RD = flags_as_string_of_ones_and_zeros[7]
+        self.RA = flags_as_string_of_ones_and_zeros[8]
+        self.Reserved = flags_as_string_of_ones_and_zeros[8:11]
+        self.RCODE = flags_as_string_of_ones_and_zeros[11:16]
+
+        self.QDCount = byte_data[5:7]
+        self.ANCount = byte_data[7:9]
+        self.NSCount = byte_data[9:11]
+        self.ARCount = byte_data[11:13]
+        return self
 
     def to_bytes(self):
         flags = int(self.QR +
@@ -118,3 +147,33 @@ class Header:
                                     self.ARCount
                                     )
         return header_bytes
+
+
+#class Resource_Record:
+#    def __init__(self,
+#                 name,
+#                 rr_type,
+#                 rr_class,
+#                 ttl,
+#                 rlength,
+#                 rdata
+#                 ):
+#        
+#        '''
+#NAME	The name being returned e.g. www or ns1.example.net If the name is in the same domain as the question then typically only the host part (label) is returned, if not then a FQDN is returned.
+#TYPE	The RR type, for example, SOA or AAAA
+#CLASS	The RR class, for instance, Internet, Chaos etc.
+#TTL	The TTL in seconds of the RR, say, 2800
+#RLENGTH	The length of RR specific data in octets, for example, 27
+#RDATA	The RR specific data (see Binary RR Formats below) whose length is defined by RDLENGTH, for instance, 192.168.254.2
+#        '''
+#
+
+class DNS_Response:
+    def __init__(self, raw_data):
+        header = Header().from_bytes(raw_data[0:12]) # header is first 12 bytes of response
+
+    def parse_data(self, data):
+        '''
+            takes a binary string of data and p
+        '''
